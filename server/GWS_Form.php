@@ -1,0 +1,32 @@
+<?php
+/**
+ * Fill a GWF_Form with a GWS_Message.
+ * 
+ * @author gizmore
+ * @since 5.0
+ * 
+ * @see GDOType;
+ * @see GWF_Form
+ * @see GWS_Message
+ */
+final class GWS_Form
+{
+	public static function bind(GWF_Form $form, GWS_Message $msg)
+	{
+		foreach ($form->getFields() as $gdoType)
+		{
+			if ($gdoType instanceof GDO_Int)
+			{
+				$gdoType->setGDOValue($msg->readN($gdoType->bytes, $gdoType->signed()));
+			}
+			elseif ($gdoType instanceof GDO_String)
+			{
+				$gdoType->setGDOValue($msg->readString());
+			}
+			elseif ($gdoType instanceof GDO_Float)
+			{
+				$gdoType->setGDOValue($msg->readFloat());
+			}
+		}
+	}
+}
