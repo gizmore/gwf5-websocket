@@ -102,7 +102,7 @@ final class GWS_Server implements MessageComponentInterface
 			$user->set('ws', $message->conn());
 			GWS_Global::addUser($user);
 			GWF_Session::commit();
-			$message->replyText('AUTH', json_encode($user->getVars('user_name', 'user_guest_name', 'user_id', 'user_credits')));
+			$message->replyText('AUTH', json_encode($user->getVars(['user_name', 'user_guest_name', 'user_id', 'user_credits'])));
 			$this->handler->connect($user);
 		}
 	}

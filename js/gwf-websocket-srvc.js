@@ -46,7 +46,8 @@ service('GWFWebsocketSrvc', function($q, $rootScope, GWFErrorSrvc, GWFLoadingSrv
 	};
 	
 	WebsocketSrvc.connectionFailure = function(error) {
-		ErrorSrvc.showError(error, 'Websocket');
+		console.log(error);
+		return GWFErrorSrvc.showError(error, 'Websocket');
 	}
 	
 	WebsocketSrvc.connect = function(url) {
@@ -56,9 +57,7 @@ service('GWFWebsocketSrvc', function($q, $rootScope, GWFErrorSrvc, GWFLoadingSrv
 		if (WebsocketSrvc.SOCKET == null) {
 			GWFLoadingSrvc.addTask('wsconnect');
 			var ws = WebsocketSrvc.SOCKET = new WebSocket(url);
-			if (WebsocketSrvc.CONFIG.binary) {
-				ws.binaryType = 'arraybuffer';
-			}
+			ws.binaryType = 'arraybuffer';
 			ws.onopen = function() {
 				GWFLoadingSrvc.stopTask('wsconnect');
 				WebsocketSrvc.startQueue();
@@ -76,9 +75,9 @@ service('GWFWebsocketSrvc', function($q, $rootScope, GWFErrorSrvc, GWFLoadingSrv
 		    		$rootScope.$broadcast('gws-ws-close');
 		    	}
 		    };
-		    ws.onerror = function(error) {
+		    ws.onerror = function(event) {
 		    	WebsocketSrvc.disconnect(true);
-				defer.reject(error);
+				defer.reject("Connection closed");
 		    };
 		    ws.onmessage = function(message) {
 		    	if (message.data instanceof ArrayBuffer) {
@@ -98,7 +97,7 @@ service('GWFWebsocketSrvc', function($q, $rootScope, GWFErrorSrvc, GWFLoadingSrv
 	WebsocketSrvc.onMessage = function(message) {
     	console.log('WebsocketSrvc.onMessage()', message.data);
     	if (message.data.indexOf('ERR:') === 0) {
-    		ErrorSrvc.showError(message.data, 'Protocol error');
+    		GWFErrorSrvc.showError(message.data, 'Protocol error');
     	}
     	else if (message.data.indexOf(':MID:') >= 0) {
     		if (!WebsocketSrvc.syncMessage(message.data)) {
@@ -118,7 +117,7 @@ service('GWFWebsocketSrvc', function($q, $rootScope, GWFErrorSrvc, GWFLoadingSrv
 		if (mid > 0) {
 			if (WebsocketSrvc.SYNC_MSGS[mid]) {
 				if (error) {
-					ErrorSrvc.showError(sprintf('Code: %04X', error).gwsMessage.readString(), 'Protocol error');
+					GWFErrorSrvc.showError(sprintf('Code: %04X', error).gwsMessage.readString(), 'Protocol error');
 					WebsocketSrvc.SYNC_MSGS[mid].reject(error);
 				}
 				else {
@@ -129,28 +128,17 @@ service('GWFWebsocketSrvc', function($q, $rootScope, GWFErrorSrvc, GWFLoadingSrv
 			}
 		}
 		if (!error) {
-			var method = sprintf('xcmd_%04X', command);
-			if (CommandSrvc[method]) {
-				setTimeout(CommandSrvc[method].bind(CommandSrvc, gwsMessage), 1);
-			}
-			else {
-				$rootScope.$broadcast('gws-ws-message', gwsMessage);
-			}
+			$rootScope.$broadcast('gws-ws-message', gwsMessage);
 		}
 		else {
-			ErrorSrvc.showError(sprintf('Code: %04X', error), 'Protocol error');
+			GWFErrorSrvc.showError(sprintf('Code: %04X', error), 'Protocol error');
 		}
 	};
 
 	WebsocketSrvc.processMessage = function(messageText) {
 //		console.log('ConnectCtrl.processMessage()', messageText);
 		var command = messageText.substrUntil(':');
-		if (CommandSrvc[command]) {
-			CommandSrvc[command](messageText.substrFrom(':'));
-		}
-		else {
-	    	$rootScope.$broadcast('gws-ws-message', messageText);
-		}
+    	$rootScope.$broadcast('gws-ws-message', messageText);
 	};
 
 	WebsocketSrvc.disconnect = function(event) {
@@ -184,7 +172,7 @@ service('GWFWebsocketSrvc', function($q, $rootScope, GWFErrorSrvc, GWFLoadingSrv
 
 	WebsocketSrvc.authFailure = function(error) {
 //		console.log('WebsocketSrvc.authFailure()', error);
-		ErrorSrvc.showError(error, 'Websocket Authentication');
+		GWFErrorSrvc.showError(error, 'Websocket Authentication');
 	};
 
 	////////////////////////

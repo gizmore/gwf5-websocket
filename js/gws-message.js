@@ -53,7 +53,6 @@ function GWS_Message(buffer) {
 		var back = '';
 		while (code = this.read8()) {
 			back += String.fromCharCode(code);
-			this.INDEX++;
 		}
 		this.INDEX++;
 		return decodeURIComponent(back);
