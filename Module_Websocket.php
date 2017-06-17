@@ -25,16 +25,17 @@ final class Module_Websocket extends GWF_Module
 			GDO_Int::make('ws_port')->bytes(2)->unsigned()->initial('61221'),
 			GDO_Duration::make('ws_timer')->initial('0'),
 			GDO_Path::make('ws_processor')->initial($this->defaultProcessorPath()),
+			GDO_Url::make('ws_url')->initial('ws://'.GWF_Url::host().':61221'),
 		);
 	}
-	public function cfgAllowGuests() { return $this->getConfigValue('ws_guests'); }
+	public function cfgUrl() { return $this->getConfigValue('ws_url'); }
 	public function cfgPort() { return $this->getConfigValue('ws_port'); }
 	public function cfgTimer() { return $this->getConfigValue('ws_timer'); }
 	public function cfgWebsocketProcessorPath() { return $this->getConfigValue('ws_processor'); }
+	public function cfgAllowGuests() { return $this->getConfigValue('ws_guests'); }
 
 	public function defaultProcessorPath() { return sprintf('%smodule/Websocket/server/GWS_NoCommands.php', GWF_PATH); }
 	public function processorClass() { return GWF_String::substrTo(basename($this->cfgWebsocketProcessorPath()), '.'); }
-	public function wsUrl() { return sprintf('ws://%s:%s', GWF_Url::host(), $this->cfgPort()); }
 
 	##########
 	### JS ###
@@ -49,7 +50,7 @@ final class Module_Websocket extends GWF_Module
 	
 	private function configJS()
 	{
-		return sprintf('window.GWF_CONFIG.ws_url = "%s"; window.GWF_CONFIG.ws_secret = "%s";', $this->wsUrl(), $this->secret());
+		return sprintf('window.GWF_CONFIG.ws_url = "%s"; window.GWF_CONFIG.ws_secret = "%s";', $this->cfgUrl(), $this->secret());
 	}
 	
 	public function secret()
