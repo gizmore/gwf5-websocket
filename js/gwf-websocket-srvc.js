@@ -223,7 +223,7 @@ service('GWFWebsocketSrvc', function($q, $rootScope, GWFErrorSrvc, GWFLoadingSrv
 	//////////
 	// Send //
 	//////////
-	WebsocketSrvc.sendCommand = function(command, payload='', async=true) {
+	WebsocketSrvc.sendCommand = function(command, payload, async) {
 		var d = $q.defer();
 		if (!WebsocketSrvc.connected()) {
 //			WebsocketSrvc.QUEUE.push(messageText);
