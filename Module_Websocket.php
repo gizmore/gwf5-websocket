@@ -64,9 +64,6 @@ final class Module_Websocket extends GWF_Module
 	##############
 	public function onRenderFor(GWF_Navbar $navbar)
 	{
-		if ($navbar->isLeft())
-		{
-			$navbar->addField(GDO_Template::make()->module($this)->template('ws-connect-bar.php'));
-		}
+		$this->templatePHP('sidebars.php', ['navbar' => $navbar]);
 	}
 }

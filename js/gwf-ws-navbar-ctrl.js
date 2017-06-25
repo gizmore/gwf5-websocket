@@ -9,4 +9,5 @@ controller('GWFWSNavbarCtrl', function($scope, GWFWebsocketSrvc) {
 		console.log('GWFWSNavbarCtrl.connect()');
 		GWFWebsocketSrvc.connect();
 	};
+	
 });
