@@ -24,7 +24,7 @@ final class Module_Websocket extends GWF_Module
 			GDO_Checkbox::make('ws_guests')->initial('1'),
 			GDO_Int::make('ws_port')->bytes(2)->unsigned()->initial('61221'),
 			GDO_Duration::make('ws_timer')->initial('0'),
-			GDO_Path::make('ws_processor')->initial($this->defaultProcessorPath()),
+			GDO_Path::make('ws_processor')->initial($this->defaultProcessorPath())->existingFile(),
 			GDO_Url::make('ws_url')->initial('ws://'.GWF_Url::host().':61221'),
 		);
 	}
