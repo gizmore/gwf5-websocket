@@ -133,7 +133,7 @@ final class GWS_Global
 	
 	public static function sendBinary(GWF_User $user, $payload)
 	{
-		if ($conn = $user->get('ws'))
+		if ($conn = $user->tempGet('ws'))
 		{
 			GWF_Log::logWebsocket(sprintf("%s << BIN", $user->displayName()));
 			GWS_Message::hexdump($payload);
@@ -184,10 +184,10 @@ final class GWS_Global
 	##################
 	public static function disconnect(GWF_User $user, $reason="NO_REASON")
 	{
-		if ($conn = $user->get('ws'))
+		if ($conn = $user->tempGet('ws'))
 		{
 			$conn->send($user, "CLOSE:".$reason);
-			$user->unset('ws');
+			$user->tempUnset('ws');
 		}
 	}
 	

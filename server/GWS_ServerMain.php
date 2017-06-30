@@ -15,7 +15,8 @@ include 'inc/GWF5.php';
 $gwf5 = new GWF5();
 GWF_Log::init();
 $db = new GDODB(GWF_DB_HOST, GWF_DB_USER, GWF_DB_PASS, GWF_DB_NAME);
-$gwf5->loadModules();
+GDOCache::init();
+$gwf5->loadModulesCache();
 
 $gws = Module_Websocket::instance();
 
