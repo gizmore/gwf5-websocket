@@ -99,6 +99,8 @@ service('GWFWebsocketSrvc', function($q, $rootScope, GWFErrorSrvc, GWFLoadingSrv
     	if (message.data.indexOf('ERR:') === 0) {
     		GWFErrorSrvc.showError(message.data, 'Protocol error');
     	}
+    	else if (message.data.indexOf('AUTH:') === 0) {
+    	}
     	else if (message.data.indexOf(':MID:') >= 0) {
     		if (!WebsocketSrvc.syncMessage(message.data)) {
     			WebsocketSrvc.processMessage(mesage.data);
