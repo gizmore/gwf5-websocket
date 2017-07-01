@@ -6,14 +6,15 @@ final class GWS_Global
 	 * @var GWF_User[]
 	 */
 	public static $USERS = array();
-// 	public static $CONNECTIONS = array();
+	public static $CONNECTIONS = array();
 	
 	##################
 	### User cache ###
 	##################
-	public static function addUser(GWF_User $user)
+	public static function addUser(GWF_User $user, $conn)
 	{
 		self::$USERS[$user->getID()] = $user;
+		self::$CONNECTIONS[$user->getID()] = $conn;
 	}
 	
 	public static function removeUser(GWF_User $user, $reason='NO_REASON')
@@ -118,7 +119,7 @@ final class GWS_Global
 	
 	public static function send(GWF_User $user, $payload)
 	{
-		if ($conn = $user->get('ws'))
+		if ($conn = self::$CONNECTIONS[$user->getID()])
 		{
 			GWF_Log::logWebsocket(sprintf("%s << %s", $user->displayName(), $payload));
 			$conn->send($payload);
@@ -133,7 +134,7 @@ final class GWS_Global
 	
 	public static function sendBinary(GWF_User $user, $payload)
 	{
-		if ($conn = $user->tempGet('ws'))
+		if ($conn = self::$CONNECTIONS[$user->getID()])
 		{
 			GWF_Log::logWebsocket(sprintf("%s << BIN", $user->displayName()));
 			GWS_Message::hexdump($payload);
@@ -184,10 +185,10 @@ final class GWS_Global
 	##################
 	public static function disconnect(GWF_User $user, $reason="NO_REASON")
 	{
-		if ($conn = $user->tempGet('ws'))
+		if ($conn = @self::$CONNECTIONS[$user->getID()])
 		{
 			$conn->send($user, "CLOSE:".$reason);
-			$user->tempUnset('ws');
+			unset(self::$CONNECTIONS[$user->getID()]);
 		}
 	}
 	

@@ -44,6 +44,8 @@ final class GWS_Server implements MessageComponentInterface
 		$message->readTextCmd();
 		if ($from->user())
 		{
+			GDO_IP::$CURRENT = $from->ip();
+			GWF_User::$CURRENT = $from->user();
 			try {
 				$this->handler->executeMessage($message);
 			}
@@ -73,6 +75,7 @@ final class GWS_Server implements MessageComponentInterface
 				$this->handler->executeMessage($message);
 			}
 			catch (Exception $e) {
+				GWF_Log::logException($e);
 				$message->replyErrorMessage($message->cmd(), $e->getMessage());
 			}
 		}
@@ -100,8 +103,8 @@ final class GWS_Server implements MessageComponentInterface
 		{
 			$message->conn()->setUser($user);
 			$conn = $message->conn();
-			$user->tempSet('ws', $conn);
-			GWS_Global::addUser($user);
+// 			$user->tempSet('ws', $conn);
+			GWS_Global::addUser($user, $conn);
 			GWF_Session::commit();
 			$message->replyText('AUTH', json_encode($user->getVars(['user_name', 'user_guest_name', 'user_id', 'user_credits'])));
 			$this->handler->connect($user);
@@ -152,7 +155,7 @@ final class GWS_Server implements MessageComponentInterface
 	
 	public function registerModuleCommands(string $entry, string $path)
 	{
-		include $path;
+		include_once $path;
 	}
 	
 	private function socketOptions()

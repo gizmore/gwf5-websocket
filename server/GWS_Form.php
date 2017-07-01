@@ -11,6 +11,11 @@
  */
 final class GWS_Form
 {
+	public static function bindMethod(GWF_MethodForm $method, GWS_Message $msg)
+	{
+		return self::bind($method->getForm(), $msg);
+	}
+	
 	public static function bind(GWF_Form $form, GWS_Message $msg)
 	{
 		foreach ($form->getFields() as $gdoType)
@@ -28,5 +33,6 @@ final class GWS_Form
 				$gdoType->setGDOValue($msg->readFloat());
 			}
 		}
+		return $form;
 	}
 }
