@@ -37,7 +37,7 @@ abstract class GWS_CommandForm extends GWS_Command
 		$form = GWS_Form::bindMethod($method, $msg);
 		$this->selectSubmit($form);
 		$this->removeCSRF($form);
-		$response = $method->renderForm();
+		$response = $method->exec();
 		$this->postExecute($msg, $form, $response);
 	}
 	

@@ -9,13 +9,11 @@ final class Websocket_GetSecret extends GWF_Method
 {
 	public function execute()
 	{
-		header("Access-Control-Allow-Origin: ".$_SERVER['SERVER_NAME']);
-		header("Access-Control-Allow-Credentials: true");
 		$json = array(
-			'user' => Module_GWF::instance()->gwfUserJS(),
+			'user' => Module_GWF::instance()->gwfUserJSON(),
 			'secret' => Module_Websocket::instance()->secret(),
 			'count' => Common::getRequestInt('count', 0),
 		);
-		return GWF_Response::make($json);
+		die(json_encode($json));
 	}
 }

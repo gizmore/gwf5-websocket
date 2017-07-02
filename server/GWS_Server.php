@@ -75,7 +75,7 @@ final class GWS_Server implements MessageComponentInterface
 				$this->handler->executeMessage($message);
 			}
 			catch (Exception $e) {
-				GWF_Log::logException($e);
+				GWF_Log::logWebsocket(GWF_Debug::backtraceException($e, false));
 				$message->replyErrorMessage($message->cmd(), $e->getMessage());
 			}
 		}
