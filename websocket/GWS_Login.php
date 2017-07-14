@@ -1,11 +1,13 @@
 <?php
-final class GWS_Login extends GWS_Command
+final class GWS_Login extends GWS_CommandForm
 {
-	public function execute(GWS_Message $msg)
+	public function getMethod() { return method('Login', 'Form'); }
+	
+	public function replySuccess(GWS_Message $msg, GWF_Form $form, GWF_Response $response)
 	{
-		$username = $msg->readString();
-		$password = $msg->readString();
-		method('Login', 'Form')->onLogin($username, $password);
+		GWF_User::$CURRENT = $user = GWF_Session::instance()->getUser();
+		GWF_Session::reset();
+		$msg->replyBinary($msg->cmd(), $this->userToBinary($user));
 	}
 }
 
