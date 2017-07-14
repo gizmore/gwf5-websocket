@@ -24,7 +24,7 @@ final class GWS_Server implements MessageComponentInterface
 		GWF_Log::logMessage("GWS_Server::mainloop()");
 		if ($timerInterval > 0)
 		{
-			$this->server->loop->addPeriodicTimer($timerInterval, array($this->handler, 'timer'));
+			$this->server->loop->addPeriodicTimer($timerInterval/1000.0, array($this->handler, 'timer'));
 		}
 		$this->server->run();
 	}

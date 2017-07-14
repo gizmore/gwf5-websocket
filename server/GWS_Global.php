@@ -17,6 +17,23 @@ final class GWS_Global
 		self::$CONNECTIONS[$user->getID()] = $conn;
 	}
 	
+	public static function recacheUser(string $userid)
+	{
+// 		var_dump($expression)
+		GWF_User::table()->cache->uncacheID($userid);
+// 		GDOCache::flush();
+
+		if (isset(self::$USERS[$userid]))
+		{
+			unset(self::$USERS[$userid]);
+			return self::loadUserById($userid);
+		}
+		else
+		{
+			return GWF_User::getById($userid);
+		}
+	}
+	
 	public static function removeUser(GWF_User $user, $reason='NO_REASON')
 	{
 		$key = $user->getID();
