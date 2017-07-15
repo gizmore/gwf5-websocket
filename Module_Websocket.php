@@ -21,7 +21,7 @@ final class Module_Websocket extends GWF_Module
 	public function getConfig()
 	{
 		return array(
-			GDO_Checkbox::make('ws_autoconnect')->initial('1'),
+			GDO_Checkbox::make('ws_autoconnect')->initial('0'),
 			GDO_Checkbox::make('ws_guests')->initial('1'),
 			GDO_Int::make('ws_port')->bytes(2)->unsigned()->initial('61221'),
 			GDO_Duration::make('ws_timer')->initial('0'),
