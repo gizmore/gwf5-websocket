@@ -13,7 +13,7 @@ service('GWFWebsocketSrvc', function($q, $rootScope, GWFErrorSrvc, GWFLoadingSrv
 	////////////
 	WebsocketSrvc.CONFIG = {
 		url: window.GWF_CONFIG.ws_url,
-		autoConnect: false,
+		autoConnect: window.GWF_CONFIG.ws_autoconnect,
 		reconnect: true, // @TODO reconnect
 		reconnectTimeout: 10000,
 		keepQueue: true, // @TODO Try to resend queue after reconnect 
@@ -24,8 +24,7 @@ service('GWFWebsocketSrvc', function($q, $rootScope, GWFErrorSrvc, GWFLoadingSrv
 		if (config.autoConnect) {
 			return WebsocketSrvc.connect();
 		}
-	}; WebsocketSrvc.configure(WebsocketSrvc.CONFIG);
-	
+	};
 	
 	////////////////
 	// Connection //
@@ -55,17 +54,19 @@ service('GWFWebsocketSrvc', function($q, $rootScope, GWFErrorSrvc, GWFLoadingSrv
 		console.log('WebsocketSrvc.connect()', url);
 		var defer = $q.defer();
 		if (WebsocketSrvc.SOCKET == null) {
+			console.log('trying');
 			GWFLoadingSrvc.addTask('wsconnect');
 			var ws = WebsocketSrvc.SOCKET = new WebSocket(url);
 			ws.binaryType = 'arraybuffer';
 			ws.onopen = function() {
+				console.log('onopen');
 				GWFLoadingSrvc.stopTask('wsconnect');
 				WebsocketSrvc.startQueue();
-		    	defer.resolve();
 		    	WebsocketSrvc.authenticate().then(function(result){
 			    	WebsocketSrvc.CONNECTED = true;
 		    		$rootScope.$broadcast('gws-ws-open');
-		    	});
+			    	defer.resolve();
+		    	}, defer.reject);
 			};
 		    ws.onclose = function() {
 				GWFLoadingSrvc.stopTask('wsconnect');
@@ -89,6 +90,7 @@ service('GWFWebsocketSrvc', function($q, $rootScope, GWFErrorSrvc, GWFLoadingSrv
 		    };
 		}
 		else {
+			console.log('Was connected.')
 			defer.reject();
 		}
 		return defer.promise;
@@ -100,6 +102,7 @@ service('GWFWebsocketSrvc', function($q, $rootScope, GWFErrorSrvc, GWFLoadingSrv
     		GWFErrorSrvc.showError(message.data, 'Protocol error');
     	}
     	else if (message.data.indexOf('AUTH:') === 0) {
+    		WebsocketSrvc.syncMessage(message.data);
     	}
     	else if (message.data.indexOf(':MID:') >= 0) {
     		if (!WebsocketSrvc.syncMessage(message.data)) {
@@ -265,10 +268,14 @@ service('GWFWebsocketSrvc', function($q, $rootScope, GWFErrorSrvc, GWFLoadingSrv
 			WebsocketSrvc.SOCKET.send(gwsMessage.binaryBuffer());
 		}
 		else {
+			console.log('Not connected!');
 			d.reject();
 		}
 		return d.promise;
 	};
 
+
+	WebsocketSrvc.configure(WebsocketSrvc.CONFIG);
+	
 	return WebsocketSrvc;
 });

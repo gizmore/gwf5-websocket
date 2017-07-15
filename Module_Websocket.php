@@ -21,6 +21,7 @@ final class Module_Websocket extends GWF_Module
 	public function getConfig()
 	{
 		return array(
+			GDO_Checkbox::make('ws_autoconnect')->initial('1'),
 			GDO_Checkbox::make('ws_guests')->initial('1'),
 			GDO_Int::make('ws_port')->bytes(2)->unsigned()->initial('61221'),
 			GDO_Duration::make('ws_timer')->initial('0'),
@@ -28,6 +29,7 @@ final class Module_Websocket extends GWF_Module
 			GDO_Url::make('ws_url')->initial('ws://'.GWF_Url::host().':61221')->pattern('#^wss?://.*#'),
 		);
 	}
+	public function cfgAutoConnect() { return $this->getConfigValue('ws_autoconnect'); }
 	public function cfgUrl() { return $this->getConfigValue('ws_url'); }
 	public function cfgPort() { return $this->getConfigValue('ws_port'); }
 	public function cfgTimer() { return $this->getConfigValue('ws_timer'); }
@@ -50,7 +52,10 @@ final class Module_Websocket extends GWF_Module
 	
 	private function configJS()
 	{
-		return sprintf('window.GWF_CONFIG.ws_url = "%s"; window.GWF_CONFIG.ws_secret = "%s";', $this->cfgUrl(), $this->secret());
+		return sprintf('window.GWF_CONFIG.ws_url = "%s";
+window.GWF_CONFIG.ws_secret = "%s";
+window.GWF_CONFIG.ws_autoconnect = %s;',
+				$this->cfgUrl(), $this->secret(), $this->cfgAutoConnect()?'1':'0');
 	}
 	
 	public function secret()
