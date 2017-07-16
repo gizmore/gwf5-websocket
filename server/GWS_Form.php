@@ -20,17 +20,17 @@ final class GWS_Form
 	{
 		foreach ($form->getFields() as $gdoType)
 		{
-			if ($gdoType instanceof GDO_Int)
-			{
-				$gdoType->setGDOValue($msg->readN($gdoType->bytes, $gdoType->signed()));
-			}
-			elseif ($gdoType instanceof GDO_String)
+			if ($gdoType instanceof GDO_String)
 			{
 				$gdoType->setGDOValue($msg->readString());
 			}
-			elseif ($gdoType instanceof GDO_Float)
+			elseif ($gdoType instanceof GDO_Decimal)
 			{
 				$gdoType->setGDOValue($msg->readFloat());
+			}
+		    elseif ($gdoType instanceof GDO_Int)
+			{
+				$gdoType->setGDOValue($msg->readN($gdoType->bytes, $gdoType->signed()));
 			}
 		}
 		return $form;
