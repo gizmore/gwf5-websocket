@@ -32,6 +32,10 @@ final class GWS_Form
 			{
 				$gdoType->setGDOValue($msg->readN($gdoType->bytes, $gdoType->signed()));
 			}
+			elseif ($gdoType instanceof GDO_Object)
+			{
+			    $gdoType->value($msg->read32u());
+			}
 		}
 		return $form;
 	}

@@ -18,7 +18,11 @@ final class GWS_AsGuest extends GWS_CommandForm
 	        $table->cache->uncacheID($id);
 	    }
 	}
-	
+
+	public function hookModuleVarsChanged($moduleId)
+	{
+	    GWF_ModuleLoader::instance()->initModuleVars();
+	}
 }
 
 GWS_Commands::register(0x0101, new GWS_AsGuest());
