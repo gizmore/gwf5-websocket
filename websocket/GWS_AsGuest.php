@@ -10,6 +10,15 @@ final class GWS_AsGuest extends GWS_CommandForm
 		$msg->replyBinary($msg->cmd(), $this->userToBinary($user));
 	}
 	
+	public function hookCacheInvalidate($table, $id)
+	{
+	    $table = GDO::tableFor($table);
+	    if ($table->cache)
+	    {
+	        $table->cache->uncacheID($id);
+	    }
+	}
+	
 }
 
 GWS_Commands::register(0x0101, new GWS_AsGuest());

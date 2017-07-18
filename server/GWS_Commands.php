@@ -37,7 +37,7 @@ class GWS_Commands
 		{
 			if (method_exists($command, $method_name))
 			{
-				call_user_func([$command, $method_name], $args);
+				call_user_func([$command, $method_name], ...$args);
 			}
 		}
 	}
