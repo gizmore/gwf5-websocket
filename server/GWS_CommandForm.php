@@ -37,6 +37,7 @@ abstract class GWS_CommandForm extends GWS_Command
 		$form = GWS_Form::bindMethod($method, $msg);
 		$this->selectSubmit($form);
 		$this->removeCSRF($form);
+		$this->removeCaptcha($form);
 		$response = $method->exec();
 		$this->postExecute($msg, $form, $response);
 	}
@@ -58,9 +59,14 @@ abstract class GWS_CommandForm extends GWS_Command
 		return $submits;
 	}
 	
+	public function removeCaptcha(GWF_Form $form)
+	{
+	    $form->removeField('captcha');
+	}
+	
 	public function removeCSRF(GWF_Form $form)
 	{
-		$form->removeField('xsrf');
+	    $form->removeField('xsrf');
 	}
 	
 	public function selectSubmit(GWF_Form $form)

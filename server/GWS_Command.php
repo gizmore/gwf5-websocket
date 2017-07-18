@@ -35,16 +35,12 @@ abstract class GWS_Command
 		$payload = '';
 		foreach ($fields as $field)
 		{
-			if ($field instanceof GDO_Int)
-			{
-				$payload .= GWS_Message::wrN($field->bytes, $gdo->getVar($field->name));
-			}
 // 			elseif ( ($field instanceof GDO_Password) ||
 // 					 ($field instanceof GDO_IP) )
 // 			{
 // 				# skip
 // 			}
-			elseif ($field instanceof GDO_String)
+			if ($field instanceof GDO_String)
 			{
 				$payload .= GWS_Message::wrS($gdo->getVar($field->name));
 			}
@@ -52,19 +48,27 @@ abstract class GWS_Command
 			{
 				$payload .= GWS_Message::wrF($gdo->getVar($field->name));
 			}
+			elseif ($field instanceof GDO_Int)
+			{
+			    $payload .= GWS_Message::wrN($field->bytes, $gdo->getVar($field->name));
+			}
 			elseif ($field instanceof GDO_Enum)
 			{
 				$value = array_search($gdo->getVar($field->name), $field->enumValues);
 				$payload .= GWS_Message::wr8($value === false ? 0 : $value + 1);
 			}
-			elseif ($field instanceof GDO_Time)
+			elseif ($field instanceof GDO_Timestamp)
 			{
-				$payload .= GWS_Message::wr32($gdo->getVar($field->name));
+			    $time = 0;
+			    if ($date = $gdo->getVar($field->name))
+			    {
+			        $time = GWF_Time::getTimestamp($date);
+			    }
+				$payload .= GWS_Message::wr32($time);
 			}
-			elseif ($field instanceof GDO_Date)
+			else
 			{
-				$value = GWF_Time::getTimestamp($gdo->getVar($field->name));
-				$payload .= GWS_Message::wr32($value);
+			    die("Cannot ws encode {$field->name}");
 			}
 		}
 		return $payload;

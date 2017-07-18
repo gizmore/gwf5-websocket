@@ -204,7 +204,7 @@ final class GWS_Global
 	{
 		if ($conn = @self::$CONNECTIONS[$user->getID()])
 		{
-			$conn->send($user, "CLOSE:".$reason);
+			$conn->send("CLOSE:".$reason);
 			unset(self::$CONNECTIONS[$user->getID()]);
 		}
 	}

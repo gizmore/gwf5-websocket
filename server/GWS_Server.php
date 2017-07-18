@@ -44,8 +44,9 @@ final class GWS_Server implements MessageComponentInterface
 		$message->readTextCmd();
 		if ($from->user())
 		{
-			GDO_IP::$CURRENT = $from->ip();
+		    GDO_IP::$CURRENT = $from->getRemoteAddress();
 			GWF_User::$CURRENT = $from->user();
+			GWF_Session::reloadID($from->user()->tempGet('sess_id'));
 			try {
 				$this->handler->executeMessage($message);
 			}
@@ -72,7 +73,10 @@ final class GWS_Server implements MessageComponentInterface
 		else
 		{
 			try {
-				$this->handler->executeMessage($message);
+			    GDO_IP::$CURRENT = $from->getRemoteAddress();
+			    GWF_User::$CURRENT = $from->user();
+			    GWF_Session::reloadID($from->user()->tempGet('sess_id'));
+			    $this->handler->executeMessage($message);
 			}
 			catch (Exception $e) {
 				GWF_Log::logWebsocket(GWF_Debug::backtraceException($e, false));
@@ -103,9 +107,9 @@ final class GWS_Server implements MessageComponentInterface
 		{
 			$message->conn()->setUser($user);
 			$conn = $message->conn();
-// 			$user->tempSet('ws', $conn);
+			$user->tempSet('sess_id', GWF_Session::instance()->getID());
 			GWS_Global::addUser($user, $conn);
-			GWF_Session::commit();
+			
 			$message->replyText('AUTH', json_encode($user->getVars(['user_name', 'user_guest_name', 'user_id', 'user_credits'])));
 			$this->handler->connect($user);
 		}
