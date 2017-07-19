@@ -19,9 +19,7 @@ final class GWS_Global
 	
 	public static function recacheUser(string $userid)
 	{
-// 		var_dump($expression)
 		GWF_User::table()->cache->uncacheID($userid);
-// 		GDOCache::flush();
 
 		if (isset(self::$USERS[$userid]))
 		{
