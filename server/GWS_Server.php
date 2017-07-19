@@ -9,24 +9,47 @@ include 'GWS_Message.php';
 
 final class GWS_Server implements MessageComponentInterface
 {
-	private $gws;
+    /**
+     * @var GWS_Commands
+     */
+    private $handler;
+    private $allowGuests;
+    
+    private $gws;
 	private $server;
+	private $ipc;
 	
-	/**
-	 * @var GWS_Commands
-	 */
-	private $handler;
-	private $allowGuests;
-// 	private $consoleLog;
+	public function __construct()
+	{
+	    if ($this->ipc)
+	    {
+	        msg_remove_queue($this->ipc);
+	    }
+	}
 	
 	public function mainloop($timerInterval=0)
 	{
 		GWF_Log::logMessage("GWS_Server::mainloop()");
 		if ($timerInterval > 0)
 		{
-			$this->server->loop->addPeriodicTimer($timerInterval/1000.0, array($this->handler, 'timer'));
+			$this->server->loop->addPeriodicTimer($timerInterval/1000.0, [$this->handler, 'timer']);
+		}
+		if (GWF_IPC)
+		{
+		    $this->ipc = msg_get_queue(1);
+		    $this->server->loop->addPeriodicTimer(0.250, [$this, 'ipcTimer']);
 		}
 		$this->server->run();
+	}
+	
+	public function ipcTimer()
+	{
+	    $message = null; $messageType = 0;
+	    msg_receive($this->ipc, 1, $messageType, 1000000, $message, true, MSG_IPC_NOWAIT);
+	    if ($message)
+	    {
+	        GWS_Commands::webHook($message);
+	    }
 	}
 	
 	###############
@@ -47,10 +70,13 @@ final class GWS_Server implements MessageComponentInterface
 		    GDO_IP::$CURRENT = $from->getRemoteAddress();
 			GWF_User::$CURRENT = $from->user();
 			GWF_Session::reloadID($from->user()->tempGet('sess_id'));
-			try {
+			try
+			{
 				$this->handler->executeMessage($message);
 			}
-			catch (Exception $e) {
+			catch (Exception $e)
+			{
+			    GWF_Log::logException($e);
 				$message->replyErrorMessage($message->cmd(), $e->getMessage());
 			}
 		}
@@ -75,7 +101,7 @@ final class GWS_Server implements MessageComponentInterface
 			try {
 			    GDO_IP::$CURRENT = $from->getRemoteAddress();
 			    GWF_User::$CURRENT = $from->user();
-			    GWF_Session::reloadID($from->user()->tempGet('sess_id'));
+// 			    GWF_Session::reloadID($from->user()->tempGet('sess_id'));
 			    $this->handler->executeMessage($message);
 			}
 			catch (Exception $e) {
