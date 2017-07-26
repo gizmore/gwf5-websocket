@@ -3,10 +3,8 @@ final class GWS_Logout extends GWS_Command
 {
     public function execute(GWS_Message $msg)
     {
-        $session = GWF_Session::instance();
         method('Login', 'Logout')->execute();
-        GWF_User::$CURRENT = GWF_User::ghost();
-        $user = GWF_User::current();
+        GWF_User::$CURRENT = $user = GWF_User::ghost();
         $msg->replyBinary($msg->cmd(), $this->userToBinary($user));
     }
 }
