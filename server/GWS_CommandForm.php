@@ -13,6 +13,21 @@ abstract class GWS_CommandForm extends GWS_Command
 	 */
 	public abstract function getMethod();
 	
+	public function fillRequestVars(GWS_Message $msg) {}
+	
+	public function execute(GWS_Message $msg)
+	{
+	    $_POST = []; $_REQUEST = []; $_FILES = [];
+	    $method = $this->getMethod();
+	    $this->fillRequestVars($msg);
+	    $form = GWS_Form::bindMethod($method, $msg);
+	    $this->selectSubmit($form);
+	    $this->removeCSRF($form);
+	    $this->removeCaptcha($form);
+	    $response = $method->exec();
+	    $this->postExecute($msg, $form, $response);
+	}
+	
 	public function postExecute(GWS_Message $msg, GWF_Form $form, GWF_Response $response)
 	{
 		if ($response->isError())
@@ -30,23 +45,12 @@ abstract class GWS_CommandForm extends GWS_Command
 		$msg->replyBinary($msg->cmd());
 	}
 	
-	public function execute(GWS_Message $msg)
-	{
-		$_POST = []; $_REQUEST = []; $_FILES = [];
-		$method = $this->getMethod();
-		$form = GWS_Form::bindMethod($method, $msg);
-		$this->selectSubmit($form);
-		$this->removeCSRF($form);
-		$this->removeCaptcha($form);
-		$response = $method->exec();
-		$this->postExecute($msg, $form, $response);
-	}
 	
 	/**
 	 * @param GWF_Form $form
 	 * @return GDO_Submit[]
 	 */
-	public function getSubmits(GWF_Form $form)
+	protected function getSubmits(GWF_Form $form)
 	{
 		$submits = [];
 		foreach ($form->getFields() as $field)
@@ -59,22 +63,22 @@ abstract class GWS_CommandForm extends GWS_Command
 		return $submits;
 	}
 	
-	public function removeCaptcha(GWF_Form $form)
+	protected function removeCaptcha(GWF_Form $form)
 	{
 	    $form->removeField('captcha');
 	}
 	
-	public function removeCSRF(GWF_Form $form)
+	protected function removeCSRF(GWF_Form $form)
 	{
 	    $form->removeField('xsrf');
 	}
 	
-	public function selectSubmit(GWF_Form $form)
+	protected function selectSubmit(GWF_Form $form)
 	{
 		$this->selectSubmitNum($form, 0);
 	}
 	
-	public function selectSubmitNum(GWF_Form $form, int $num)
+	protected function selectSubmitNum(GWF_Form $form, int $num)
 	{	
 		$submits = $this->getSubmits($form);
 		if ($submit = @$submits[$num])

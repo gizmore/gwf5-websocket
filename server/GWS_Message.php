@@ -33,7 +33,14 @@ final class GWS_Message
 		return $this->from->send($payload);
 	}
 	
-	public function replyBinary($command, $data='')
+	/**
+	 * Reply to a command.
+	 * Set the MessageID accordingly for synchronous messages.
+	 * @param int $command 2 byte id
+	 * @param string $data binary payload
+	 * @return boolean
+	 */
+	public function replyBinary(int $command, string $data='')
 	{
 		GWF_Log::logWebsocket(sprintf("%s << BIN", $this->user() ? $this->user()->displayName() : '???'));
 		$command |= $this->mid > 0 ? 0x8000 : 0; # Set LSB to mark MID reply sync msg mode.

@@ -1,6 +1,7 @@
 <?php
 include 'GWS_Command.php';
 include 'GWS_CommandForm.php';
+include 'GWS_CommandMethod.php';
 
 /**
  * Command handler base class.

@@ -88,7 +88,7 @@ final class GWS_Server implements MessageComponentInterface
 	
 	public function onBinaryMessage(ConnectionInterface $from, $data)
 	{
-		printf("%s >> BIN\n", $from->user() ? $from->user()->displayName() : '???');
+		printf("%s >> BIN\n", $from->user() ? $from->user()->displayNameLabel() : '???');
 		echo GWS_Message::hexdump($data);
 		$message = new GWS_Message($data, $from);
 		$message->readCmd();

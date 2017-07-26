@@ -28,6 +28,10 @@ final class GWS_Form
 			{
 				$gdoType->setGDOValue($msg->readFloat());
 			}
+			elseif ($gdoType instanceof GDO_Bool)
+			{
+			    $gdoType->setGDOValue($msg->read8() > 0);
+			}
 		    elseif ($gdoType instanceof GDO_Int)
 			{
 				$gdoType->setGDOValue($msg->readN($gdoType->bytes, $gdoType->signed()));
