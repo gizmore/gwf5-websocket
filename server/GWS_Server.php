@@ -89,6 +89,7 @@ final class GWS_Server implements MessageComponentInterface
 	public function onBinaryMessage(ConnectionInterface $from, $data)
 	{
 		printf("%s >> BIN\n", $from->user() ? $from->user()->displayNameLabel() : '???');
+		GDO_IP::$CURRENT = $from->getRemoteAddress();
 		echo GWS_Message::hexdump($data);
 		$message = new GWS_Message($data, $from);
 		$message->readCmd();
@@ -99,7 +100,6 @@ final class GWS_Server implements MessageComponentInterface
 		else
 		{
 			try {
-			    GDO_IP::$CURRENT = $from->getRemoteAddress();
 			    GWF_User::$CURRENT = $from->user();
 // 			    GWF_Session::reloadID($from->user()->tempGet('sess_id'));
 			    $this->handler->executeMessage($message);

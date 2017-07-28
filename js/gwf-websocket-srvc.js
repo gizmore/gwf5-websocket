@@ -122,7 +122,7 @@ service('GWFWebsocketSrvc', function($q, $rootScope, GWFErrorSrvc, GWFLoadingSrv
 		if (mid > 0) {
 			if (WebsocketSrvc.SYNC_MSGS[mid]) {
 				if (error) {
-					GWFErrorSrvc.showError(sprintf('Code: %04X', error).gwsMessage.readString(), 'Protocol error');
+					GWFErrorSrvc.showError(sprintf('Code %04X: %s', error, gwsMessage.readString()), 'Protocol error');
 					WebsocketSrvc.SYNC_MSGS[mid].reject(error);
 				}
 				else {

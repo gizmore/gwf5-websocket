@@ -8,7 +8,7 @@ include 'protected/config.php'; # <-- You might need to adjust this path.
 include 'inc/GWF5.php';
 
 $gwf5 = new GWF5();
-GWF_Log::init(null, 0x28);
+GWF_Log::init(null, 0x20ff);
 $db = new GDODB(GWF_DB_HOST, GWF_DB_USER, GWF_DB_PASS, GWF_DB_NAME);
 GDOCache::init();
 
