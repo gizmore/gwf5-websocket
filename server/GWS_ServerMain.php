@@ -9,6 +9,11 @@ include 'inc/GWF5.php';
 
 $gwf5 = new GWF5();
 GWF_Log::init(null, 0x20ff);
+GWF_Debug::init();
+#GWF_Debug::enableErrorHandler();
+#GWF_Debug::enableExceptionHandler();
+#GWF_Debug::setDieOnError(GWF_ERROR_DIE);
+GWF_Debug::setMailOnError(GWF_ERROR_MAIL);
 $db = new GDODB(GWF_DB_HOST, GWF_DB_USER, GWF_DB_PASS, GWF_DB_NAME);
 GDOCache::init();
 
