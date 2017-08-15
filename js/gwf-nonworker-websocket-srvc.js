@@ -56,38 +56,38 @@ service('GWFWebsocketSrvc', function($q, $rootScope, GWFErrorSrvc, GWFLoadingSrv
 		if (WebsocketSrvc.SOCKET == null) {
 			console.log('trying');
 			GWFLoadingSrvc.addTask('wsconnect');
-			
-			WebsocketSrvc.SOCKET = new Worker('module/Websocket/js/gwf-websocket-worker.js');
-			WebsocketSrvc.SOCKET.addEventListener('message', function(e) {
-				console.log('message', e);
-				switch(e.data.cmd) {
-				case 'open':
-					GWFLoadingSrvc.stopTask('wsconnect');
-			    	WebsocketSrvc.authenticate().then(function(result){
-				    	WebsocketSrvc.CONNECTED = true;
-			    		$rootScope.$broadcast('gws-ws-open');
-				    	defer.resolve();
-			    	}, defer.reject);
-			    	break;
-				case 'close':
-					GWFLoadingSrvc.stopTask('wsconnect');
+			var ws = WebsocketSrvc.SOCKET = new WebSocket(url);
+			ws.binaryType = 'arraybuffer';
+			ws.onopen = function() {
+				console.log('onopen');
+				GWFLoadingSrvc.stopTask('wsconnect');
+				WebsocketSrvc.startQueue();
+		    	WebsocketSrvc.authenticate().then(function(result){
+			    	WebsocketSrvc.CONNECTED = true;
+		    		$rootScope.$broadcast('gws-ws-open');
+			    	defer.resolve();
+		    	}, defer.reject);
+			};
+		    ws.onclose = function() {
+				GWFLoadingSrvc.stopTask('wsconnect');
+		    	WebsocketSrvc.disconnect(true);
+		    	if (WebsocketSrvc.CONNECTED) {
 			    	WebsocketSrvc.CONNECTED = false;
 		    		$rootScope.$broadcast('gws-ws-close');
-	
-				case 'error':
-					break;
-					
-				case 'binary':
-					WebsocketSrvc.onBinaryMessage(e.data.message);
-					break;
-					
-				case 'plaintext':
-					WebsocketSrvc.onMessage(e.data.message);
-					break;
-
-				}
-			  }, false);
-			WebsocketSrvc.SOCKET.postMessage({cmd:'connect', url:url });
+		    	}
+		    };
+		    ws.onerror = function(event) {
+		    	WebsocketSrvc.disconnect(true);
+				defer.reject("Connection closed");
+		    };
+		    ws.onmessage = function(message) {
+		    	if (message.data instanceof ArrayBuffer) {
+		    		WebsocketSrvc.onBinaryMessage(message);
+		    	}
+		    	else {
+		    		WebsocketSrvc.onMessage(message);
+		    	}
+		    };
 		}
 		else {
 			console.log('Was connected.')
@@ -97,19 +97,19 @@ service('GWFWebsocketSrvc', function($q, $rootScope, GWFErrorSrvc, GWFLoadingSrv
 	};
 	
 	WebsocketSrvc.onMessage = function(message) {
-    	console.log('WebsocketSrvc.onMessage()', message);
-    	if (message.indexOf('ERR:') === 0) {
-    		GWFErrorSrvc.showError(message, 'Protocol error');
+    	console.log('WebsocketSrvc.onMessage()', message.data);
+    	if (message.data.indexOf('ERR:') === 0) {
+    		GWFErrorSrvc.showError(message.data, 'Protocol error');
     	}
-    	else if (message.indexOf('AUTH:') === 0) {
-    		WebsocketSrvc.syncMessage(message);
+    	else if (message.data.indexOf('AUTH:') === 0) {
+    		WebsocketSrvc.syncMessage(message.data);
     	}
-    	else if (message.indexOf(':MID:') >= 0) {
-    		if (!WebsocketSrvc.syncMessage(message)) {
-    			WebsocketSrvc.processMessage(mesage);
+    	else if (message.data.indexOf(':MID:') >= 0) {
+    		if (!WebsocketSrvc.syncMessage(message.data)) {
+    			WebsocketSrvc.processMessage(mesage.data);
     		}
     	} else {
-			WebsocketSrvc.processMessage(message);
+			WebsocketSrvc.processMessage(message.data);
     	}
 	};
 
@@ -149,7 +149,7 @@ service('GWFWebsocketSrvc', function($q, $rootScope, GWFErrorSrvc, GWFLoadingSrv
 	WebsocketSrvc.disconnect = function(event) {
 //		console.log('WebsocketSrvc.disconnect()');
 		if (WebsocketSrvc.SOCKET != null) {
-			WebsocketSrvc.SOCKET.postMessage({cmd: 'disconnect'});
+			WebsocketSrvc.SOCKET.close();
 			WebsocketSrvc.SOCKET = null;
 			WebsocketSrvc.SYNC_MSGS = {};
 			if (event) {
@@ -250,7 +250,7 @@ service('GWFWebsocketSrvc', function($q, $rootScope, GWFErrorSrvc, GWFLoadingSrv
 	
 	WebsocketSrvc.send = function(messageText) {
 		console.log('WebsocketSrvc.send()', messageText);
-		WebsocketSrvc.SOCKET.postMessage({cmd: 'plaintext', message: messageText});
+		WebsocketSrvc.SOCKET.send(messageText);
 	};
 	
 	
@@ -265,8 +265,7 @@ service('GWFWebsocketSrvc', function($q, $rootScope, GWFErrorSrvc, GWFLoadingSrv
 				d.resolve();
 			}
 			console.log('WebsocketSrvc.sendBinary()', gwsMessage.dump());
-			
-			WebsocketSrvc.SOCKET.postMessage({cmd: 'binary', message: gwsMessage.binaryBuffer()});
+			WebsocketSrvc.SOCKET.send(gwsMessage.binaryBuffer());
 		}
 		else {
 			console.log('Not connected!');
